@@ -113,11 +113,29 @@ nav.wrap{
 }
 .navtoggle{ display:none; background:none; border:1px solid var(--border); color:var(--text); width:40px; height:40px; border-radius:8px; }
 
-/* ---------------- TAB PANELS ---------------- */
+/* ---------------- SECTIONS (continuous scroll) ---------------- */
 main{ min-height:70vh; }
-.panel{ display:none; padding:72px 0 96px; animation: rise .5s ease; }
-.panel.active{ display:block; }
-@keyframes rise{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+.panel{ padding:72px 0 96px; scroll-margin-top:88px; border-top:1px solid transparent; }
+.panel + .panel{ border-top:1px solid var(--border); }
+
+/* ---------------- SCROLL REVEAL ---------------- */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+  will-change: opacity, transform;
+}
+.reveal.in-view{ opacity:1; transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){
+  .reveal{ opacity:1; transform:none; transition:none; }
+}
+/* staggered delays for repeated card/row groups */
+.skill-box.reveal:nth-of-type(1),.stat.reveal:nth-child(1),.edu-row.reveal:nth-of-type(1),.contact-card.reveal:nth-of-type(1),.project-card.reveal:nth-of-type(1){ transition-delay:.0s; }
+.skill-box.reveal:nth-of-type(2),.stat.reveal:nth-child(2),.edu-row.reveal:nth-of-type(2),.contact-card.reveal:nth-of-type(2),.project-card.reveal:nth-of-type(2){ transition-delay:.09s; }
+.skill-box.reveal:nth-of-type(3),.stat.reveal:nth-child(3),.edu-row.reveal:nth-of-type(3),.contact-card.reveal:nth-of-type(3),.project-card.reveal:nth-of-type(3){ transition-delay:.18s; }
+.edu-row.reveal:nth-of-type(4),.project-card.reveal:nth-of-type(4){ transition-delay:.27s; }
+.edu-row.reveal:nth-of-type(5),.project-card.reveal:nth-of-type(5){ transition-delay:.36s; }
+.edu-row.reveal:nth-of-type(6),.project-card.reveal:nth-of-type(6){ transition-delay:.45s; }
 
 .kicker{
   font-family:'Inter', sans-serif;
@@ -254,7 +272,16 @@ main{ min-height:70vh; }
 .chip-3{ top:44%; right:6%; }
 
 /* ---------------- ABOUT ---------------- */
-.about-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:56px; align-items:start; }
+.about-grid{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  grid-template-areas: "intro photo" "body photo";
+  gap:56px;
+  align-items:start;
+}
+.about-intro{ grid-area:intro; }
+.about-photo{ grid-area:photo; }
+.about-body{ grid-area:body; }
 .about-grid h2{ font-size:clamp(2rem,3.6vw,2.7rem); margin-bottom:22px; }
 .about-grid p{ color:var(--text-dim); font-size:1.02rem; line-height:1.75; max-width:58ch; }
 .about-grid p + p{ margin-top:16px; }
@@ -332,13 +359,12 @@ main{ min-height:70vh; }
 .proj-arrow:hover{ border-color:var(--accent); color:var(--accent-text); }
 .projects-track{
   display:flex; gap:20px;
-  overflow-x:auto; scroll-snap-type:x proximity;
+  overflow-x:auto; overflow-y:hidden;
+  scroll-snap-type:x mandatory;
   padding:4px 4px 14px;
   scrollbar-width:thin;
   touch-action: pan-x;
   overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scroll-padding-left: 4px;
 }
 .projects-track:focus{ outline:none; }
 .projects-track::-webkit-scrollbar{ height:6px; }
@@ -465,7 +491,6 @@ main{ min-height:70vh; }
 .cert-track{
   display:flex; gap:20px; overflow:hidden;
   max-width:640px;
-  justify-content:center;
 }
 .cert-card{
   min-width:260px;
@@ -526,13 +551,21 @@ footer .ficons{ display:flex; gap:10px; }
   .hero-cta{ flex-direction:column; align-items:stretch; width:100%; }
   .hero-cta .btn{ width:100%; justify-content:center; }
   .hero-socials{ justify-content:center; }
-  .about-grid{ grid-template-columns:1fr; }
+  .about-grid{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "intro"
+      "photo"
+      "body";
+    gap:0;
+  }
+  .about-intro{ margin-bottom:20px; }
+  .about-body{ margin-top:0; }
   .skills-grid{ grid-template-columns:1fr; }
   .contact-grid{ grid-template-columns:1fr; }
   .stat-row{ flex-wrap:wrap; gap:20px; }
-  .cert-track{ max-width:100%; }
-  .cert-card{ display:none; }
-  .cert-card.center{ display:block; min-width:0; width:100%; max-width:280px; margin:0 auto; }
+  .cert-track{ max-width:260px; }
+  .cert-card{ min-width:220px; }
   .edu-row{ grid-template-columns:1fr; gap:4px; }
 }
 
@@ -551,8 +584,8 @@ footer .ficons{ display:flex; gap:10px; }
   .hero-socials{ margin-top:22px; }
   .stat-row{ gap:14px 24px; }
   .stat-num{ font-size:1.5rem; }
-  .project-card{ flex-basis:82vw; max-width:300px; }
-  .cert-card.center{ max-width:240px; padding:20px; }
+  .cert-track{ max-width:220px; }
+  .cert-card{ min-width:190px; padding:20px; }
 }
 
 /* mobile nav side drawer */
@@ -581,8 +614,40 @@ footer .ficons{ display:flex; gap:10px; }
 .hero-photo{
   width:100%; height:100%;
   object-fit:cover;
+  object-position:center 30%;
   position:relative; z-index:1;
   border-radius:20px;
+}
+
+/* About photo becomes a circular avatar on mobile (overrides .hero-visual{display:none}) */
+@media (max-width:900px){
+  .about-photo{
+    display:flex;
+    width:280px; height:280px;
+    margin:8px auto 12px;
+    border-radius:50%;
+    overflow:hidden;
+    flex-shrink:0;
+    box-shadow:
+      0 0 0 3px var(--bg),
+      0 0 0 6px var(--accent),
+      0 0 18px 4px var(--accent-soft);
+    transition: box-shadow .35s ease;
+  }
+  .about-photo:active,
+  .about-photo:hover,
+  .about-photo:focus-visible{
+    box-shadow:
+      0 0 0 3px var(--bg),
+      0 0 0 6px var(--accent),
+      0 0 26px 8px var(--accent-soft),
+      0 0 46px 14px var(--accent-soft);
+  }
+  .about-photo .hero-photo{ border-radius:50%; }
+  .about-photo .floating-chip{ display:none; }
+}
+@media (max-width:480px){
+  .about-photo{ width:240px; height:240px; }
 }
 </style>
 </head>
@@ -609,7 +674,7 @@ footer .ficons{ display:flex; gap:10px; }
 <main class="wrap">
 
   <!-- HOME -->
-  <section class="panel active" id="panel-home">
+  <section class="panel" id="panel-home">
     <div class="hero-grid">
       <div>
         <div class="badge-pill">AI Developer <span class="sep">·</span> Web Developer <span class="sep">·</span> ML Engineer</div>
@@ -617,9 +682,9 @@ footer .ficons{ display:flex; gap:10px; }
         <div class="typing-line">I build <span id="typeTarget"></span><span class="cursor">&nbsp;</span></div>
         <p class="hero-desc">Dedicated and proactive AI Developer skilled in machine learning, generative AI, and agentic systems. Proven ability to build LLM-powered applications and privacy-first AI tools using RAG, LangChain, and local model deployment. Skilled in leading end-to-end AI projects from data processing to deployment. Also experienced in full-stack web development.</p>
         <div class="hero-cta">
-          <button class="btn btn-primary" onclick="showTab('ai')">View Projects</button>
+          <button class="btn btn-primary" onclick="scrollToSection('ai')">View Projects</button>
           <a class="btn btn-outline" href="resume .pdf" download="Visalakshi_K_Resume.pdf">Download Resume</a>
-          <button class="btn btn-outline" onclick="showTab('contact')">Contact Me</button>
+          <button class="btn btn-outline" onclick="scrollToSection('contact')">Contact Me</button>
         </div>
         <div class="hero-socials">
           <a class="icon-btn" href="https://www.linkedin.com/in/visalakshi-kathiresan26/" target="_blank" rel="noopener" aria-label="LinkedIn">
@@ -639,41 +704,46 @@ footer .ficons{ display:flex; gap:10px; }
   <!-- ABOUT -->
   <section class="panel" id="panel-about">
     <div class="about-grid">
-      <div>
+      <div class="about-intro reveal">
         <div class="kicker">Introduction</div>
         <h2>About Me</h2>
+      </div>
+      <div class="hero-visual about-photo reveal" aria-hidden="true" style="aspect-ratio:1/1;">
+        <picture>
+          <source media="(max-width: 900px)" srcset="visa-mobile.jpg">
+          <img src="visa.jpg" alt="Visalakshi K" class="hero-photo">
+        </picture>
+        <div class="floating-chip chip-1">Python</div>
+        <div class="floating-chip chip-2">Agentic AI</div>
+      </div>
+      <div class="about-body reveal">
         <p>I'm Visalakshi, an AI Developer based in Coimbatore, Tamil Nadu, specializing in machine learning, generative AI, and agentic systems. I build applications that turn raw data and natural language into practical, reliable tools — from LLM-powered analysis pipelines to RAG systems and AI agents.</p>
         <p>My technical foundation spans Python, applied machine learning, and local LLM development using LangChain and Ollama, alongside agentic AI workflows and the Claude API. I'm also comfortable across the web stack — HTML, CSS, JavaScript, and PHP — which lets me ship complete, usable interfaces around the systems I build, not just the models underneath. I build systems that are useful, explainable, and privacy-first by design.</p>
         <p>Alongside AI work, I build in Unity — most recently an AR/VR learning platform for children with autism — because I'm just as interested in who technology reaches as in how it works.</p>
         <div class="stat-row">
-          <div class="stat"><div class="stat-num">9.83</div><div class="stat-label">CGPA · MCA</div></div>
-          <div class="stat"><div class="stat-num">12+</div><div class="stat-label">Projects Built</div></div>
-          <div class="stat"><div class="stat-num">AI/ML</div><div class="stat-label">Core Focus</div></div>
+          <div class="stat reveal"><div class="stat-num">9.83</div><div class="stat-label">CGPA · MCA</div></div>
+          <div class="stat reveal"><div class="stat-num">12+</div><div class="stat-label">Projects Built</div></div>
+          <div class="stat reveal"><div class="stat-num">AI/ML</div><div class="stat-label">Core Focus</div></div>
         </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true" style="aspect-ratio:1/1;">
-        <img src="visa.jpg" alt="Visalakshi K" class="hero-photo">
-        <div class="floating-chip chip-1">Python</div>
-        <div class="floating-chip chip-2">Agentic AI</div>
       </div>
     </div>
   </section>
 
   <!-- SKILLS -->
   <section class="panel" id="panel-skills">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="kicker">Toolbox</div>
       <h2>Technical Skills</h2>
     </div>
     <div class="skills-grid">
       <div>
-        <div class="skill-box" style="margin-bottom:24px;">
+        <div class="skill-box reveal" style="margin-bottom:24px;">
           <h3><span class="sw"></span>Languages</h3>
           <div class="chips">
             <span class="chip">Python</span><span class="chip">Java</span><span class="chip">C</span><span class="chip">C#</span><span class="chip">SQL</span><span class="chip">PHP</span>
           </div>
         </div>
-        <div class="skill-box">
+        <div class="skill-box reveal">
           <h3><span class="sw"></span>Web &amp; Tools</h3>
           <div class="chips">
             <span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip">Unity 3D</span><span class="chip">XR Toolkit</span><span class="chip">Android</span><span class="chip">MySQL</span><span class="chip">Firebase</span><span class="chip">Git</span><span class="chip">VS Code</span><span class="chip">Jupyter</span>
@@ -681,19 +751,19 @@ footer .ficons{ display:flex; gap:10px; }
         </div>
       </div>
       <div>
-        <div class="skill-box">
+        <div class="skill-box reveal">
           <h3><span class="sw"></span>AI, ML &amp; Data</h3>
           <div class="chips">
             <span class="chip">Scikit-learn</span><span class="chip">Pandas</span><span class="chip">NumPy</span><span class="chip">Matplotlib</span><span class="chip">LLM</span><span class="chip">LangChain</span><span class="chip">Ollama</span><span class="chip">RAG</span><span class="chip">Prompt Engineering</span><span class="chip">Gemini</span><span class="chip">deepeval</span><span class="chip">FastAPI</span><span class="chip">Multithreading</span>
           </div>
         </div>
-        <div class="skill-box" style="margin-top:24px;">
+        <div class="skill-box reveal" style="margin-top:24px;">
           <h3><span class="sw"></span>Agentic AI &amp; Claude</h3>
           <div class="chips">
             <span class="chip">Agentic AI</span><span class="chip">Claude API</span><span class="chip">Subagents</span><span class="chip">AI Fluency</span><span class="chip">Claude Code</span>
           </div>
         </div>
-        <div class="rotator">
+        <div class="rotator reveal">
           <div class="r-label">Domain Rotator</div>
           <div class="rotator-display">
             <button id="rotPrev" aria-label="Previous">‹</button>
@@ -707,7 +777,7 @@ footer .ficons{ display:flex; gap:10px; }
 
   <!-- AI & PYTHON -->
   <section class="panel" id="panel-ai">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="kicker">Intelligence &amp; Code</div>
       <h2>AI &amp; Python Systems</h2>
       <p>Exploring generative AI and local LLM applications through Python.</p>
@@ -721,7 +791,7 @@ footer .ficons{ display:flex; gap:10px; }
 
   <!-- SYSTEMS (AR/VR) -->
   <section class="panel" id="panel-systems">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="kicker">Engineering &amp; Impact</div>
       <h2>AR/VR &amp; Systems</h2>
       <p>Interactive systems built for accessibility and real-world impact.</p>
@@ -735,7 +805,7 @@ footer .ficons{ display:flex; gap:10px; }
 
   <!-- WEB -->
   <section class="panel" id="panel-web">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="kicker">Featured Portfolio</div>
       <h2>Web Development</h2>
       <p>A practical web system built to solve a real operational problem.</p>
@@ -749,43 +819,43 @@ footer .ficons{ display:flex; gap:10px; }
 
   <!-- EXPERIENCE & EDUCATION -->
   <section class="panel" id="panel-experience">
-    <div class="section-head" style="text-align:center; max-width:none;">
+    <div class="section-head reveal" style="text-align:center; max-width:none;">
       <div class="kicker" style="justify-content:center;">Track Record</div>
       <h2>Experience &amp; Education</h2>
     </div>
 
-    <div class="cert-heading" style="text-align:left; margin-bottom:20px;">Work Experience</div>
+    <div class="cert-heading reveal" style="text-align:left; margin-bottom:20px;">Work Experience</div>
     <div class="edu-list">
-      <div class="edu-row">
+      <div class="edu-row reveal">
         <div class="edu-year">Present 2026</div>
         <div><div class="edu-title">AI Developer </div><div class="edu-school">iamneo - An NIIT Venture</div></div>
         <div class="edu-score">Trainee</div>
       </div>
-      <div class="edu-row">
+      <div class="edu-row reveal">
         <div class="edu-year">Dec 2025</div>
         <div><div class="edu-title">Web Developer</div><div class="edu-school">Unified Mentor Private Limited</div></div>
         <div class="edu-score">Internship</div>
       </div>
     </div>
 
-    <div class="cert-heading" style="text-align:left; margin-bottom:20px;">Education</div>
+    <div class="cert-heading reveal" style="text-align:left; margin-bottom:20px;">Education</div>
     <div class="edu-list">
-      <div class="edu-row">
+      <div class="edu-row reveal">
         <div class="edu-year">2023 – 2025</div>
         <div><div class="edu-title">Master of Computer Applications (MCA)</div><div class="edu-school">SRM Institute of Science and Technology</div></div>
         <div class="edu-score">CGPA 9.83</div>
       </div>
-      <div class="edu-row">
+      <div class="edu-row reveal">
         <div class="edu-year">2020 – 2023</div>
         <div><div class="edu-title">B.Sc Biotechnology</div><div class="edu-school">Bon Secours College for Women</div></div>
         <div class="edu-score">CGPA 8.55</div>
       </div>
-      <div class="edu-row">
+      <div class="edu-row reveal">
         <div class="edu-year">2019 – 2020</div>
         <div><div class="edu-title">HSC</div><div class="edu-school">Maxwell Matriculation Hr. Sec. School</div></div>
         <div class="edu-score">67%</div>
       </div>
-      <div class="edu-row">
+      <div class="edu-row reveal">
         <div class="edu-year">2017 – 2018</div>
         <div><div class="edu-title">SSLC</div><div class="edu-school">Maxwell Matriculation Hr. Sec. School</div></div>
         <div class="edu-score">84%</div>
@@ -793,7 +863,7 @@ footer .ficons{ display:flex; gap:10px; }
     </div>
 
 
-    <div class="cert-heading">Certifications</div>
+    <div class="cert-heading reveal">Certifications</div>
     <div class="cert-carousel">
       <button class="cert-arrow" id="certPrev" aria-label="Previous certificate">‹</button>
       <div class="cert-track" id="certTrack"></div>
@@ -804,25 +874,25 @@ footer .ficons{ display:flex; gap:10px; }
 
   <!-- CONTACT -->
   <section class="panel" id="panel-contact">
-    <div class="contact-head">
+    <div class="contact-head reveal">
       <div class="kicker" style="justify-content:center;">Get In Touch</div>
       <h2>Let's Create Something Meaningful</h2>
       <p>Have a project, opportunity, or collaboration in mind? I'd love to hear from you — reach out through any of the channels below.</p>
     </div>
     <div class="contact-grid">
-      <a class="contact-card" href="mailto:visalakshikathiresan26@gmail.com">
+      <a class="contact-card reveal" href="mailto:visalakshikathiresan26@gmail.com">
         <div class="cicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h20v16H2V4zm0 2 10 7 10-7"/></svg></div>
         <div class="clabel">Email</div>
         <div class="cvalue">visalakshikathiresan26@gmail.com</div>
         <div class="caction">Let's talk about it →</div>
       </a>
-      <a class="contact-card" href="https://www.linkedin.com/in/visalakshi-kathiresan26/" target="_blank" rel="noopener">
+      <a class="contact-card reveal" href="https://www.linkedin.com/in/visalakshi-kathiresan26/" target="_blank" rel="noopener">
         <div class="cicon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.11 1 2.48 1s2.5 1.12 2.5 2.5zM.5 8.25h4V23h-4V8.25zM8.5 8.25h3.83v2.01h.05c.53-1 1.84-2.06 3.79-2.06 4.05 0 4.8 2.67 4.8 6.14V23h-4v-6.87c0-1.64-.03-3.75-2.29-3.75-2.29 0-2.64 1.79-2.64 3.63V23h-4V8.25z"/></svg></div>
         <div class="clabel">LinkedIn</div>
         <div class="cvalue">visalakshi-kathiresan26</div>
         <div class="caction">Professional networking →</div>
       </a>
-      <a class="contact-card" href="https://github.com/visalakshi-kathiresan" target="_blank" rel="noopener">
+      <a class="contact-card reveal" href="https://github.com/visalakshi-kathiresan" target="_blank" rel="noopener">
         <div class="cicon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.93.58.11.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.41-2.69 5.38-5.25 5.67.42.36.78 1.07.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .31.21.68.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg></div>
         <div class="clabel">GitHub</div>
         <div class="cvalue">visalakshi-kathiresan</div>
@@ -845,11 +915,12 @@ footer .ficons{ display:flex; gap:10px; }
 </footer>
 
 <script>
-// ---------- TAB NAVIGATION ----------
+// ---------- CONTINUOUS-SCROLL NAVIGATION ----------
 const themeMap = { home:'pink', about:'pink', skills:'pink', web:'pink', ai:'purple', systems:'orange', experience:'pink', contact:'pink' };
 const navButtons = Array.from(document.querySelectorAll('#navlist button'));
 const mobileSheetEl = document.getElementById('mobileSheet');
 const navToggleEl = document.getElementById('navtoggle');
+let currentSection = 'home';
 
 function openMobileSheet(){
   mobileSheetEl.classList.add('open');
@@ -869,8 +940,8 @@ function buildMobileSheet(){
     const clone = document.createElement('button');
     clone.textContent = b.textContent;
     clone.dataset.tab = b.dataset.tab;
-    if(b.classList.contains('active')) clone.classList.add('active');
-    clone.addEventListener('click', ()=>{ showTab(b.dataset.tab); closeMobileSheet(); });
+    if(b.dataset.tab === currentSection) clone.classList.add('active');
+    clone.addEventListener('click', ()=>{ scrollToSection(b.dataset.tab); closeMobileSheet(); });
     mobileSheetEl.appendChild(clone);
   });
 }
@@ -878,76 +949,53 @@ buildMobileSheet();
 
 navToggleEl.addEventListener('click', toggleMobileSheet);
 
-function showTab(tab){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+tab).classList.add('active');
+// Smooth-scroll to a section (used by nav clicks and hero CTA buttons)
+function scrollToSection(tab){
+  const target = document.getElementById('panel-'+tab);
+  if(target) target.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+navButtons.forEach(b=> b.addEventListener('click', ()=> scrollToSection(b.dataset.tab)));
+
+// Scroll-spy: highlight nav + swap accent theme as each section crosses the viewport
+function setActiveSection(tab){
+  if(tab === currentSection) return;
+  currentSection = tab;
   navButtons.forEach(b=> b.classList.toggle('active', b.dataset.tab===tab));
   document.body.setAttribute('data-theme', themeMap[tab] || 'pink');
   buildMobileSheet();
-  requestAnimationFrame(()=>{
-    window.scrollTo({top:0, left:0, behavior:'smooth'});
+}
+
+const HEADER_OFFSET = 80; // px reserved for sticky header
+const sectionRatios = new Map();
+
+const sectionObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const tab = entry.target.id.replace('panel-','');
+    sectionRatios.set(tab, entry.isIntersecting ? entry.intersectionRatio : 0);
   });
-  sessionStorage.setItem('activeTab', tab);
-}
-navButtons.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
+  let bestTab = null, bestRatio = 0;
+  sectionRatios.forEach((ratio, tab)=>{
+    if(ratio > bestRatio){ bestRatio = ratio; bestTab = tab; }
+  });
+  if(bestTab) setActiveSection(bestTab);
+}, { root:null, rootMargin:`-${HEADER_OFFSET}px 0px -55% 0px`, threshold:[0, 0.1, 0.25, 0.5, 0.75, 1] });
 
-const savedTab = sessionStorage.getItem('activeTab');
-if(savedTab && document.getElementById('panel-'+savedTab)){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+savedTab).classList.add('active');
-  navButtons.forEach(b=> b.classList.toggle('active', b.dataset.tab===savedTab));
-  document.body.setAttribute('data-theme', themeMap[savedTab] || 'pink');
-  buildMobileSheet();
-}
+document.querySelectorAll('.panel').forEach(p=> sectionObserver.observe(p));
 
-document.addEventListener('keydown', (e)=>{
-  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-  const tabs = navButtons.map(b=> b.dataset.tab);
-  const current = tabs.find(t=> document.getElementById('panel-'+t).classList.contains('active'));
-  const idx = tabs.indexOf(current);
-  if(e.key === 'ArrowRight'){
-    showTab(tabs[(idx+1) % tabs.length]);
-  } else if(e.key === 'ArrowLeft'){
-    showTab(tabs[(idx-1+tabs.length) % tabs.length]);
-  }
-});
-
-// ---------- SWIPE BETWEEN SECTIONS (mobile) ----------
-(function(){
-  let startX = 0, startY = 0, startTarget = null;
-  const THRESHOLD = 55;   // min horizontal distance to count as a swipe
-  const RATIO = 1.5;      // must be mostly horizontal, not a vertical scroll
-
-  function insideOwnScroller(el){
-    // don't hijack swipes meant for the project cards, cert carousel, or the mobile menu
-    return !!(el && el.closest && el.closest('.projects-track, .cert-track, .mobile-sheet'));
-  }
-
-  document.addEventListener('touchstart', (e)=>{
-    if(e.touches.length !== 1) return;
-    startTarget = e.target;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, {passive:true});
-
-  document.addEventListener('touchend', (e)=>{
-    if(insideOwnScroller(startTarget)) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    if(Math.abs(dx) < THRESHOLD) return;
-    if(Math.abs(dx) < Math.abs(dy) * RATIO) return;
-
-    const tabs = navButtons.map(b=> b.dataset.tab);
-    const current = tabs.find(t2=> document.getElementById('panel-'+t2).classList.contains('active'));
-    const idx = tabs.indexOf(current);
-    if(dx < 0){
-      showTab(tabs[(idx+1) % tabs.length]);       // swipe left -> next section
-    } else {
-      showTab(tabs[(idx-1+tabs.length) % tabs.length]); // swipe right -> previous section
+// ---------- SCROLL REVEAL ----------
+const revealObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      revealObserver.unobserve(entry.target);
     }
-  }, {passive:true});
-})();
+  });
+}, { root:null, rootMargin:'0px 0px -8% 0px', threshold:0.12 });
+
+function observeReveals(root=document){
+  root.querySelectorAll('.reveal:not(.in-view)').forEach(el=> revealObserver.observe(el));
+}
+observeReveals();
 
 
 // ---------- TYPING EFFECT ----------
@@ -1023,7 +1071,7 @@ function projectImageUrl(p){
 function buildProjectCard(p){
   const imgUrl = projectImageUrl(p);
   return `
-    <div class="project-card">
+    <div class="project-card reveal">
       <div class="pvisual" style="background-image:url('${imgUrl}');">
         ${p.status === 'ongoing' ? `<span class="pstatus-badge">In Progress</span>` : ''}
         <span class="ptag-badge">${p.tag}</span>
@@ -1066,6 +1114,7 @@ renderTrack('sysTrack', sysProjects);
 wireArrows('aiPrev', 'aiNext', 'aiTrack');
 wireArrows('webPrev', 'webNext', 'webTrack');
 wireArrows('sysPrev', 'sysNext', 'sysTrack');
+observeReveals();
 
 // ---------- CERTIFICATIONS CAROUSEL ----------
 const certs = [
