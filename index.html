@@ -332,11 +332,13 @@ main{ min-height:70vh; }
 .proj-arrow:hover{ border-color:var(--accent); color:var(--accent-text); }
 .projects-track{
   display:flex; gap:20px;
-  overflow-x:auto; scroll-snap-type:x mandatory;
+  overflow-x:auto; scroll-snap-type:x proximity;
   padding:4px 4px 14px;
   scrollbar-width:thin;
   touch-action: pan-x;
   overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-left: 4px;
 }
 .projects-track:focus{ outline:none; }
 .projects-track::-webkit-scrollbar{ height:6px; }
@@ -463,6 +465,7 @@ main{ min-height:70vh; }
 .cert-track{
   display:flex; gap:20px; overflow:hidden;
   max-width:640px;
+  justify-content:center;
 }
 .cert-card{
   min-width:260px;
@@ -527,8 +530,9 @@ footer .ficons{ display:flex; gap:10px; }
   .skills-grid{ grid-template-columns:1fr; }
   .contact-grid{ grid-template-columns:1fr; }
   .stat-row{ flex-wrap:wrap; gap:20px; }
-  .cert-track{ max-width:260px; }
-  .cert-card{ min-width:220px; }
+  .cert-track{ max-width:100%; }
+  .cert-card{ display:none; }
+  .cert-card.center{ display:block; min-width:0; width:100%; max-width:280px; margin:0 auto; }
   .edu-row{ grid-template-columns:1fr; gap:4px; }
 }
 
@@ -547,8 +551,8 @@ footer .ficons{ display:flex; gap:10px; }
   .hero-socials{ margin-top:22px; }
   .stat-row{ gap:14px 24px; }
   .stat-num{ font-size:1.5rem; }
-  .cert-track{ max-width:220px; }
-  .cert-card{ min-width:190px; padding:20px; }
+  .project-card{ flex-basis:82vw; max-width:300px; }
+  .cert-card.center{ max-width:240px; padding:20px; }
 }
 
 /* mobile nav side drawer */
