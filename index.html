@@ -564,8 +564,9 @@ footer .ficons{ display:flex; gap:10px; }
   .skills-grid{ grid-template-columns:1fr; }
   .contact-grid{ grid-template-columns:1fr; }
   .stat-row{ flex-wrap:wrap; gap:20px; }
-  .cert-track{ max-width:260px; }
-  .cert-card{ min-width:220px; }
+  .cert-track{ max-width:260px; overflow:visible; }
+  .cert-card{ min-width:260px; }
+  .cert-card:not(.center){ display:none; }
   .edu-row{ grid-template-columns:1fr; gap:4px; }
 }
 
@@ -584,8 +585,9 @@ footer .ficons{ display:flex; gap:10px; }
   .hero-socials{ margin-top:22px; }
   .stat-row{ gap:14px 24px; }
   .stat-num{ font-size:1.5rem; }
-  .cert-track{ max-width:220px; }
-  .cert-card{ min-width:190px; padding:20px; }
+  .cert-carousel{ gap:10px; }
+  .cert-track{ max-width:200px; }
+  .cert-card{ min-width:200px; padding:20px; }
 }
 
 /* mobile nav side drawer */
