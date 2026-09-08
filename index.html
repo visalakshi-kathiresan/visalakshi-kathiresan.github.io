@@ -15,6 +15,7 @@
   --surface:#170B14;
   --surface-2:#1E0F1A;
   --border: rgba(255,255,255,0.09);
+  --border-strong: rgba(255,255,255,0.22);
   --text:#F5F1F3;
   --text-dim:#B4A9B1;
   --text-faint:#786E75;
@@ -115,8 +116,28 @@ nav.wrap{
 
 /* ---------------- SECTIONS (continuous scroll) ---------------- */
 main{ min-height:70vh; }
-.panel{ padding:72px 0 96px; scroll-margin-top:88px; border-top:1px solid transparent; }
-.panel + .panel{ border-top:1px solid var(--border); }
+.panel{ position:relative; z-index:0; padding:72px 0 96px; scroll-margin-top:88px; }
+.panel::before{
+  content:"";
+  position:absolute;
+  top:0; bottom:0; left:50%;
+  width:100vw;
+  transform:translateX(-50%);
+  z-index:-1;
+  background:transparent;
+  transition: background .4s ease;
+}
+.panel:nth-of-type(even)::before{ background:var(--surface-2); }
+.panel + .panel::after{
+  content:"";
+  position:absolute;
+  top:0; left:50%;
+  transform:translateX(-50%);
+  width:min(1100px, 92%);
+  height:1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-strong) 12%, var(--accent) 50%, var(--border-strong) 88%, transparent 100%);
+  opacity:0.6;
+}
 
 /* ---------------- SCROLL REVEAL ---------------- */
 .reveal{
@@ -564,9 +585,8 @@ footer .ficons{ display:flex; gap:10px; }
   .skills-grid{ grid-template-columns:1fr; }
   .contact-grid{ grid-template-columns:1fr; }
   .stat-row{ flex-wrap:wrap; gap:20px; }
-  .cert-track{ max-width:260px; overflow:visible; }
-  .cert-card{ min-width:260px; }
-  .cert-card:not(.center){ display:none; }
+  .cert-track{ max-width:260px; }
+  .cert-card{ min-width:220px; }
   .edu-row{ grid-template-columns:1fr; gap:4px; }
 }
 
@@ -585,9 +605,8 @@ footer .ficons{ display:flex; gap:10px; }
   .hero-socials{ margin-top:22px; }
   .stat-row{ gap:14px 24px; }
   .stat-num{ font-size:1.5rem; }
-  .cert-carousel{ gap:10px; }
-  .cert-track{ max-width:200px; }
-  .cert-card{ min-width:200px; padding:20px; }
+  .cert-track{ max-width:220px; }
+  .cert-card{ min-width:190px; padding:20px; }
 }
 
 /* mobile nav side drawer */
